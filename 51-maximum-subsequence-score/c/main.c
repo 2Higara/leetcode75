@@ -1,11 +1,12 @@
 #include <stdlib.h>
-
+// swap the value of two int pointers
 void intPointerValueSwap(int *a, int *b) {
   int tmp = *a;
   *a = *b;
   *b = tmp;
 }
-
+// given a heap and an index to a node,
+// make the node and all its braches a minimum heap
 void minRootHeapify(int *list1, int len, int i_curr_node) {
   int i_min = i_curr_node;
   int i_lc = i_curr_node * 2; // index of left child
@@ -34,6 +35,7 @@ priorityQueue newPriorityQueue(int cap) {
   return pIns;
 }
 
+// add a number to minimum priority queue
 void enMinPriorityQueue(priorityQueue *pIns, int val) {
   pIns->len++;
   pIns->data[pIns->len] = val;
@@ -47,9 +49,10 @@ void enMinPriorityQueue(priorityQueue *pIns, int val) {
   }
 }
 
+// remove root node(min value node) from minimum priority queue
 int deMinPriorityQueue(priorityQueue *pIns) {
   int root = pIns->data[1];
-  pIns->data[1] = pIns->data[pIns->len];
+  pIns->data[1] = pIns->data[pIns->len]; // move last leaf node to front
   pIns->len--;
   minRootHeapify(pIns->data, pIns->len, 1);
   return root;
@@ -75,45 +78,32 @@ long long maxScore(int *nums1, int nums1Size, int *nums2, int nums2Size,
   // sort bind array by num2 in max order
   qsort(num_arr, nums1Size, sizeof(Pair), cmpByNum2);
 
-  // use min priority queue to store value of the largest (k-1) num1, as it is
-  // easy to get the minmum value of this queue, so that it can optimize
-  // sum1_max calculation
-  priorityQueue mpq1 =
-      newPriorityQueue(k - 1); // mpq1 - num1's min priority queue
+  // initialize min priority queue, sum1 max, max score with first k
+  // elements(nums[0]...nums[k-1])
+  priorityQueue mpq1 = newPriorityQueue(k); // mpq1 - min priority queue of num1
   long long sum1_max = 0;
-  // initialize mpq1 and sum1_max with first k elements
-  for (int i = 0; i < k - 1; i++) {
+  for (int i = 0; i < k; i++) {
     enMinPriorityQueue(&mpq1, num_arr[i].n1);
     sum1_max += num_arr[i].n1;
   }
+  long long maxScore = sum1_max * num_arr[k - 1].n2;
 
-  // traverse on nums2[k]...nums2[nums2Size-1], to find the max score
-  long long maxScore;
+  // traverse on later elements(nums2[k]...nums2[nums2Size-1]), to find the max
+  // score.
   long long tmpScore;
-  if (k > 1) {
-    maxScore = (sum1_max + num_arr[k - 1].n1) * num_arr[k - 1].n2;
-    for (int i = k; i < nums2Size; i++) {
-      // update largest k-1 num1's sum
-      if (num_arr[i - 1].n1 > mpq1.data[1]) {
-        sum1_max -= deMinPriorityQueue(&mpq1);
-        sum1_max += num_arr[i - 1].n1;
-        enMinPriorityQueue(&mpq1, num_arr[i - 1].n1);
-      }
-      tmpScore = (sum1_max + num_arr[i].n1) * num_arr[i].n2;
+  for (int i = k; i < nums2Size; i++) {
+    // since num2 is descending, if new tmp score wants to be larger than
+    // original max score, its corresponding sum1_max should be larger than
+    // original sum1_max, thus num2's corresponding num1 should be larger than
+    // the root value in mpq1
+    if (num_arr[i].n1 > mpq1.data[1]) {
+      sum1_max -= deMinPriorityQueue(&mpq1);
+      sum1_max += num_arr[i].n1;
+      enMinPriorityQueue(&mpq1, num_arr[i].n1);
+      tmpScore = sum1_max * num_arr[i].n2;
       if (tmpScore > maxScore) {
         maxScore = tmpScore;
       }
-    }
-  } else {
-    //  if k = 1, the tmp score will simply be num1*num2
-    //  our formal strategy won't work here, because num1's priority queue
-    //  length would be 0, queue capacity would be 1, but the strategy requires
-    //  minimum queue length be 1 and queue cap be 2
-    maxScore = 0;
-    for (int i = 0; i < nums2Size; i++) {
-      tmpScore = num_arr[i].n1 * num_arr[i].n2;
-      if (tmpScore > maxScore)
-        maxScore = tmpScore;
     }
   }
 
