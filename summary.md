@@ -19,5 +19,6 @@ Leetcode-75
 | Heap / Priority Queue | 49~52 |
 | Binary Search | 53~56 |
 | Backtracking | 57~58 |
-| DP-1D | 59~62 |
+| DP - 1D | 59~62 |
 |DP - Multidimensional|63~66|
+|Bit Manipulation|67~69|
