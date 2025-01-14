@@ -22,3 +22,6 @@ Leetcode-75
 | DP - 1D | 59~62 |
 |DP - Multidimensional|63~66|
 |Bit Manipulation|67~69|
+| Trie|70~71 |
+| Intervals|72~73 |
+| Monotonic Stack| 74~75|
