@@ -16,16 +16,19 @@ typedef struct PriorityQueue {
 
 void minHeapify(PriorityQueue *ins, int i);
 
-PriorityQueue newPriorityQueue(int cap) {
+PriorityQueue newPriorityQueue() {
   PriorityQueue ins;
-  ins.cap = cap + 1;
+  ins.cap = 2;
   ins.len = 0;
   ins.data = (int *)malloc(sizeof(int) * ins.cap);
   return ins;
 }
 
 void enMinPriorityQueue(PriorityQueue *ins, int n) {
-  ins->len++;
+  if (++ins->len == ins->cap) {
+    ins->cap *= 2;
+    ins->data = realloc(ins->data, ins->cap * sizeof(int));
+  }
   ins->data[ins->len] = n;
   int i = ins->len, i_f = i / 2;
   while (i_f > 0 && ins->data[i_f] > ins->data[i]) {
@@ -64,7 +67,7 @@ long long totalCost(int *costs, int costsSize, int k, int candidates) {
   int i_r = costsSize - candidates; //  left bound
   long long sum = 0;
   if (i_l >= i_r) {
-    PriorityQueue pq = newPriorityQueue(costsSize);
+    PriorityQueue pq = newPriorityQueue();
     for (int i = 0; i < costsSize; i++) {
       enMinPriorityQueue(&pq, costs[i]);
     }
@@ -73,8 +76,8 @@ long long totalCost(int *costs, int costsSize, int k, int candidates) {
     free(pq.data);
     return sum;
   } else {
-    PriorityQueue pql = newPriorityQueue(candidates);
-    PriorityQueue pqr = newPriorityQueue(candidates);
+    PriorityQueue pql = newPriorityQueue();
+    PriorityQueue pqr = newPriorityQueue();
     for (int i = 0; i < i_l + 1; i++) {
       enMinPriorityQueue(&pql, costs[i]);
     }
@@ -93,7 +96,7 @@ long long totalCost(int *costs, int costsSize, int k, int candidates) {
           enMinPriorityQueue(&pqr, costs[i_r]);
         }
       } else {
-        PriorityQueue pq = newPriorityQueue(2 * candidates);
+        PriorityQueue pq = newPriorityQueue();
         for (int j = 1; j < candidates + 1; j++) {
           enMinPriorityQueue(&pq, pql.data[j]);
           enMinPriorityQueue(&pq, pqr.data[j]);
@@ -114,6 +117,6 @@ int main() {
 #define SIZE 9
   int costs[SIZE] = {17, 12, 10, 2, 7, 2, 11, 20, 8};
   int k = 3;
-  int candidates = 4;
+  int candidates = 1;
   printf("%lld\n", totalCost(costs, SIZE, k, candidates));
 }
